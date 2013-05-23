@@ -8,6 +8,11 @@ import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.session.mgt.ExecutorServiceSessionValidationScheduler;
 import org.junit.Test;
 
+/**
+ * A workaround that works with Shiro 1.2.1 without causing multiple threads to be created and left around.
+ * 
+ * @author cstamas
+ */
 public class SessionManagerWorkaroundTest
     extends SessionManagerTestSupport
 {

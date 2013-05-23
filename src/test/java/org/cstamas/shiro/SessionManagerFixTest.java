@@ -5,14 +5,15 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.shiro.session.mgt.DefaultSessionManager;
+import org.apache.shiro.session.mgt.SessionValidationScheduler;
 import org.junit.Test;
 
 /**
- * Test that shows the problem. After running it, you will have more that one session validator thread created.
+ * Test that shows the problem might be fixed with DCL.
  * 
  * @author cstamas
  */
-public class SessionManagerTest
+public class SessionManagerFixTest
     extends SessionManagerTestSupport
 {
     @Test
@@ -21,7 +22,22 @@ public class SessionManagerTest
     {
         logger.info( "## Started sessionValidationThreadTest()" );
         final long sessionValidationInterval = TimeUnit.SECONDS.toMillis( 5 );
-        final DefaultSessionManager sessionManager = new DefaultSessionManager();
+        final DefaultSessionManager sessionManager = new DefaultSessionManager()
+        {
+            @Override
+            protected synchronized void enableSessionValidation()
+            {
+                SessionValidationScheduler scheduler = getSessionValidationScheduler();
+                synchronized ( this )
+                {
+                    scheduler = getSessionValidationScheduler();
+                    if ( scheduler == null )
+                    {
+                        super.enableSessionValidation();
+                    }
+                }
+            }
+        };
         sessionManager.setSessionValidationInterval( sessionValidationInterval );
 
         acquireSessionsInParallel( sessionManager );
