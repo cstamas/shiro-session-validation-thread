@@ -25,15 +25,18 @@ public class SessionManagerFixTest
         final DefaultSessionManager sessionManager = new DefaultSessionManager()
         {
             @Override
-            protected synchronized void enableSessionValidation()
+            protected void enableSessionValidation()
             {
                 SessionValidationScheduler scheduler = getSessionValidationScheduler();
-                synchronized ( this )
+                if ( scheduler == null )
                 {
-                    scheduler = getSessionValidationScheduler();
-                    if ( scheduler == null )
+                    synchronized ( this )
                     {
-                        super.enableSessionValidation();
+                        scheduler = getSessionValidationScheduler();
+                        if ( scheduler == null )
+                        {
+                            super.enableSessionValidation();
+                        }
                     }
                 }
             }
